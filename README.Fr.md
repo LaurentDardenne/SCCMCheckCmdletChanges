@@ -102,3 +102,20 @@ isBreakingChange           : False
 
 Une commande peut être présente dans plusieurs release note et pour des raisons différentes.
 
+Pour le cmdlet Set-CMScriptDeploymentType, la version 2002 précise :
+
+### Breaking changes
+
+The -ContentLocation will no longer accept an empty folder.
+
+### Bugs that were fixed
+
+The -ContentLocation shouldn't allow an empty folder.
+
+Et la version 2006 précise :
+
+For more information, see [Set-CMScriptDeploymentType.](https://docs.microsoft.com/en-us/powershell/module/configurationmanager/set-cmscriptdeploymenttype?view=sccm-ps)
+
+### Non-breaking changes
+
+You can now specify an empty string for the parameters -UninstallCommand and -RepairCommand.
