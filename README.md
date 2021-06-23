@@ -5,4 +5,4 @@ Checks source files for the presence of a command name using a regex.
 Occurrences in comments are considered, because if we do use the Powershell AST you can no longer search in the source files in C # for example.
 
 under contruction
-[French version](README.Fr.Md)
+[French version](SCCMCheckCmdletChanges/blob/main/README.Fr.Md)
