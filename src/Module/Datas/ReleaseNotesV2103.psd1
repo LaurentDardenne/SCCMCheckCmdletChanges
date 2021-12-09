@@ -1,6 +1,6 @@
 @{
    #Version de la release note
-   LibraryChangesForVersion='2013'
+   LibraryChangesForVersion='2103'
 
    #Url de la release note
    Url='https://docs.microsoft.com/en-us/powershell/sccm/2103-release-notes?view=sccm-ps'
