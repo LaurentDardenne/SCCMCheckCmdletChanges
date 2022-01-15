@@ -11,7 +11,7 @@ An command can be deleted, deprecated, its contract changed with or without brea
 To reference the modifications of a SCCM release this module uses a hashtable hosted in a .psd1 file.
 Each key name in this hashtable specifies a type of modification and is associated with an array of command name or an empty array.
 
-Example for the breaking changes of the [release note 2013]( https://docs.microsoft.com/en-us/powershell/sccm/2103-release-notes?view=sccm-ps) :
+Example for the breaking changes of the [release note 2103]( https://docs.microsoft.com/en-us/powershell/sccm/2103-release-notes?view=sccm-ps) :
 ```Powershell
    BreakingChangesCommandNames=@(
       'New-CMSoftwareUpdateAutoDeploymentRule'

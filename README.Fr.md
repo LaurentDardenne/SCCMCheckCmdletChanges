@@ -11,7 +11,7 @@ Une commande peut-être supprimée, dépréciée, son contrat changé avec ou sa
 Pour référencer les modifications d'une release de SCCM ce module utilise une hashtable hébergée dans un fichier .psd1.
 Chaque nom de clé de cette hashtable précise un type de modification et est associé à un tableau de nom de commande ou un tableau vide.
 
-Exemple pour les breaking change de la [release note 2013]( https://docs.microsoft.com/en-us/powershell/sccm/2103-release-notes?view=sccm-ps) :
+Exemple pour les breaking change de la [release note 2103]( https://docs.microsoft.com/en-us/powershell/sccm/2103-release-notes?view=sccm-ps) :
 
 ```Powershell
    BreakingChangesCommandNames=@(
