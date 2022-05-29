@@ -1,5 +1,5 @@
 ﻿ConvertFrom-StringData @' 
- LoggerDoNotExist=The logger '{0}' do not exist or is `$null.
- ModuleDoNotImported=The module '{0}' was not imported.
- RepositoryDoNotExist=The repository '{0}' do not exist.
+ LoggerDoNotExist=Le logger '{0}' n'existe pas ou est `$null.
+ ModuleDoNotImported=Le module '{0}' n'a pas été importé.
+ RepositoryDoNotExist=Le repository '{0}' n'existe pas.
 '@ 
