@@ -3,9 +3,6 @@
 
    Url='https://docs.microsoft.com/fr-fr/powershell/sccm/2010-release-notes?view=sccm-ps'
 
-   #Les nouveaux cmdlets ne sont pas recensés car ils n'existent pas dans le code source.
-   #Le contrôle des nouveaux cmdlets, en cas de modification, sera prise en charge par la prochaine release,
-
    RemovedCmdletNames=@(
       'Add-CMAndroidDeploymentType'
       'Add-CMGooglePlayDeploymentType'
@@ -17,22 +14,16 @@
       'Set-CMIosDeploymentType'
    )
 
-    #Alias supprimés
    RemovedAliasNames=@(
    )
 
-    #cmdlet obsolète (déconseillés)
    DeprecatedCommandNames=@(
       'Set-CMClientSetting'
    )
 
-    #Les éléments suivants ont des problèmes connus de la bibliothèque d'applets de commande qui ne sont pas résolus dans cette version.
    UnresolvedBugCommandNames=@(
    )
 
-    #Les modifications suivantes ont été apportées aux applets de commande existantes dans cette version.
-    #Les modifications peuvent être de nouvelles fonctionnalités, des correctifs de bogues ou la dépréciation.
-    #Examinez attentivement les modifications pour comprendre comment elles peuvent affecter votre utilisation.
    ChangedCommandNames=@(
       'Add-CMComplianceSettingRegistryKeyValue'
       'Add-CMDistributionPoint'

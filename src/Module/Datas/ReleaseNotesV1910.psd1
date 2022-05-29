@@ -53,7 +53,6 @@
     'Set-CMWindowsEnrollmentProfile'
    )
 
-    #Alias supprimés
    RemovedAliasNames=@(
     'Set-CMIntuneSubscriptionMacOSProperties'
     'Set-CMIntuneSubscriptionIosProperties'
@@ -62,18 +61,14 @@
     'Set-CMIntuneSubscriptionAppleMdmProperty'
    )
 
-    #cmdlet obsolète (déconseillés)
+
    DeprecatedCommandNames=@()
 
-    #Les éléments suivants ont des problèmes connus de la bibliothèque d'applets de commande qui ne sont pas résolus dans cette version.
    UnresolvedBugCommandNames=@(
     'Import-CMSecurityRole'
     'Set-CMSoftwareUpdatePoint'
    )
 
-    #Les modifications suivantes ont été apportées aux applets de commande existantes dans cette version.
-    #Les modifications peuvent être de nouvelles fonctionnalités, des correctifs de bogues ou la dépréciation.
-    #Examinez attentivement les modifications pour comprendre comment elles peuvent affecter votre utilisation.
    ChangedCommandNames=@(
     'Add-CMDistributionPoint'
     'Add-CMMsiDeploymentType'
