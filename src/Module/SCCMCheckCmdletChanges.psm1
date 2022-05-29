@@ -59,7 +59,6 @@ Function New-SCCMCommandReleaseNote{
     }
 }
 
-#todo test peut-on avoir une release note sans clé de renseignée ( aucune modification) ?
 Function Get-SCCMCommandReleaseNote{
    param(
      #[ValidateNotNull()]
@@ -77,7 +76,6 @@ Function Get-SCCMCommandReleaseNote{
 
         $Data=Import-PowerShellDataFile $DataFile -ErrorAction Stop
 
-        #todo check keys
         Write-Debug "Read $DataFile"
        if ($isFilteredByVersion -and ($Data.LibraryChangesForVersion -NotIn $Version))
        { Continue }

@@ -47,7 +47,7 @@ The listed items have known issues that are not resolved in this release. The co
 
 ### ChangedCommandNames
 
-TODO The following changes have been made to existing cmdlets in this release. They can be new features, bug fixes, or deprecation. Carefully review the changes to understand how they may affect your usage. The code using them may need to be corrected if the bug was not known during development.
+The following changes have been made to existing cmdlets in this release. They can be new features, bug fixes, or deprecation. Carefully review the changes to understand how they may affect your usage. The code using them may need to be corrected if the bug was not known during development.
 
 ### BreakingChangesCommandNames
 List the modifications of commands having breaking changes. The behavior of the command has been modified, the code using them needs to be corrected.
