@@ -1,45 +1,45 @@
-#Ce Template de release note SCCM est utilisé par le module afin de contrôler les clés obligatoires
-#Toutes les clés le sont, si une des clés n'est pas utilisée elle doit être associées à un tableau vide.
+#This SCCM release note template is used by the module to control mandatory keys
+#All keys are mandatory, if one of the keys is not used it must be associated with an empty array.
 
 @{
-   #Version de la release note
+   #Release note version
    LibraryChangesForVersion=''
 
-   #Url de la release note
+   #Url of the release note
    Url=''
 
-   #Les nouveaux cmdlets ne sont pas recensés car ils n'existent pas dans le code source.
-   #Le contrôle des nouveaux cmdlets, en cas de modification, sera prise en charge par la prochaine release,
+   #New cmdlets are not registered because they do not exist in the source code.
+   #The control of new cmdlets, in case of modification, will be supported by the next release,
 
-    #Cmdlet supprimés
-    #Le code les utilisant est à corriger. Ces commandes sont considéré comme des breaking change
+    #Deleted Cmdlet
+    #The source code using them needs to be corrected. These commands are considered breaking changes
    RemovedCmdletNames=@(
    )
 
     #Alias supprimés
-    #Le code les utilisant est à corriger. Ces commandes sont considéré comme des breaking change
+    #The source code using them needs to be corrected. These commands are considered breaking changes
    RemovedAliasNames=@(
    )
 
-    #cmdlet obsolète (déconseillés)
-    #Le code les utilisant n'est pas impacté, il est recommandé de ne plus les utiliser et d'adapter le code.
+    #Deprecated cmdlet 
+    #The source code using them is not impacted, it is recommended to stop using them and to adapt the code.
    DeprecatedCommandNames=@()
 
-    #Les éléments suivants ont des problèmes connus de la bibliothèque d'applets de commande qui ne sont pas résolus dans cette version.
-    #Le code les utilisant est peut-être à corriger si le bug n'était pas connu lors du développement.
+    #The following cmdlet have known issues with the Cmdlet Library that are not fixed in this release.
+    #The source code using them may need to be corrected if the bug was not known during development.
    UnresolvedBugCommandNames=@(
    )
 
-    #Les modifications suivantes ont été apportées aux applets de commande existantes dans cette version.
-    #Elles peuvent être de nouvelles fonctionnalités, des correctifs de bogues ou la dépréciation.
-    #Examinez attentivement les modifications pour comprendre comment elles peuvent affecter votre utilisation.
-    #Le code les utilisant est peut-être à corriger si le bug n'était pas connu lors du développement.
+    #The following changes have been made to existing cmdlets in this release.
+    #They can be new features, bug fixes or deprecation.
+    #Review the changes carefully to understand how they may affect your use.
+    #The source code using them may need to be corrected if the bug was not known during development.
    ChangedCommandNames=@(
    )
 
-    #Les modifications suivantes sont indiquées comme étant des breaking change.
-    #Le comportement de la commande a été modifié
-    #Le code les utilisant est à corriger.
+    #The following changes are marked as breaking changes.
+    #Command behavior has been changed
+    #The source code using them needs to be corrected.
    BreakingChangesCommandNames=@(
    )
 }
