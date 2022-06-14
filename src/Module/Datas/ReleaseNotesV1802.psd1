@@ -1,6 +1,6 @@
 @{
     #Release
-    #Configuration Manager current branch version 1802 is the baseline for these changes.
+    #Configuration Manager current branch version 1710 is the baseline for these changes.
    LibraryChangesForVersion='1802'
 
    Url='https://github.com/MicrosoftDocs/sccm-docs-powershell-ref/blob/main/docs-conceptual/1802_Release_Notes.md'
