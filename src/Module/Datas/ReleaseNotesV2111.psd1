@@ -120,7 +120,7 @@
                 'New-CMRequirementRuleOperatingSystemValue',
                 'New-CMRequirementRuleOUValue',
                 'New-CMRequirementRuleRegistryKeyPermissionValue',
-                'New-CMRequirementRuleScreenResolutionValue',
+                'New-CMRequirementRuleScreenResolutionValue'
 
     )
 
