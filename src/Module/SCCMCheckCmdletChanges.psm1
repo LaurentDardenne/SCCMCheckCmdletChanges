@@ -77,8 +77,10 @@ Function New-SCCMCommandReleaseNote{
 Function Test-ReleaseNoteRequirement{
   param(
     $Datas,
-    $FileName)
-try {
+    $FileName
+  )
+
+ try {
   $oldOFS,$ofs=$OFS,','
 
   $KeysToCompare=[string[]]$Datas.Keys
@@ -145,7 +147,7 @@ Function Get-SCCMCommandReleaseNote{
 
         if ( $isFilteredByVersion -and ($Datas.LibraryChangesForVersion -NotIn $Version) )
         { Continue }
-        Test-ReleaseNoteRequirement -Datas $Datas -FileName $Datafile -Exclude:$Filter
+        Test-ReleaseNoteRequirement -Datas $Datas -FileName $Datafile
 
         $Parameters=@{
           Version=$Datas.LibraryChangesForVersion
@@ -191,7 +193,11 @@ Function Find-CommandName{
 
   $Groups=(Get-SCCMCommandReleaseNote -Version $Version)|
           Group-Object -Property Name -AsHashTable
-  #todo versions not exist
+  If ($null -eq $Groups)
+  { 
+    Write-Verbose "No release note found for version $Version" 
+    return
+  }
   ForEach ($CurrentFile in $Path)
   {
     ForEach ($CurrentCommand in $Groups.GetEnumerator())
