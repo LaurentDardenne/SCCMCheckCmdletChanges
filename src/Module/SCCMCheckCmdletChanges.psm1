@@ -1,5 +1,20 @@
 #SCCMCheckCmdletChanges.psm1
 
+[string[]]$script:KeysName=@(
+   'LibraryChangesForVersion',
+   'Url'
+)
+
+[string[]]$script:KeysNameArrayType=@(
+   'RemovedCmdletNames',
+   'RemovedAliasNames',
+   'DeprecatedCommandNames',
+   'UnresolvedBugCommandNames',
+   'ChangedCommandNames',
+   'BreakingChangesCommandNames'
+)
+[string[]]$script:KeysNameMustExist=@($script:KeysNameArrayType+$script:KeysName)
+
 Function New-SCCMCommandReleaseNote{
 #Définie un objet de release SCCM
 #Chaque commande présente dans une release note peut y être citée pour différentes raisons.
@@ -59,6 +74,49 @@ Function New-SCCMCommandReleaseNote{
     }
 }
 
+Function Test-ReleaseNoteRequirement{
+  param(
+    $Datas,
+    $FileName)
+try {
+  $oldOFS,$ofs=$OFS,','
+
+  $KeysToCompare=[string[]]$Datas.Keys
+  $Groups=Compare-Object $script:KeysNameMustExist $KeysToCompare -IncludeEqual|Group-Object 'SideIndicator' -AsHashTable
+
+    #Pas de différence
+  if ($Groups.'=='.Count -ne $KeysNameMustExist.Count)
+  {
+      #Une ou + clés requises n'existent pas
+      #absent de la liste 
+    if ($Groups.'=>'.Count -gt 0)
+    { Throw "The required keys do not exist : {0} . Release note file '{1}'" -F $Groups.'=>',$FileName }
+      #Les clés requises existent, 
+      #la collection comparée contient une ou des clés supplémentaires
+    if ($Groups.'<='.Count -gt 0)
+    { Write-Warning "The following are not managed : {0} . Release note file '{1}'" -F $Groups.'<=',$FileName }
+  }
+  #Teste les prerequis
+  $RnVersion=$Datas.LibraryChangesForVersion
+  [ref]$v=$null
+  if ([String]::IsNullOrEmpty($RnVersion) -or ([int]::TryParse($RnVersion,$v) -eq $false))
+  { Throw "The key 'LibraryChangesForVersion' must contains an integer : {0} . Release note file '{1}'" -F $RnVersion,$FileName }
+
+  $Uri=[Uri]$Datas.Url
+  if ( ($Uri.Scheme -notmatch 'Http') -or ($Uri.IsAbsoluteUri -ne $true) )
+  { Throw "The key 'Url' must contains an URL. Release note file '{1}'" -F $Datas.Url,$FileName }
+
+  Foreach ($Current in $script:KeysNameArrayType)
+  {
+    if ( ($null -eq $Datas.$Current) -or ($Datas.$Current -isnot [System.Array]) ) 
+    { Throw "The key '$Current' must be of type Array. Release note file '{1}'" -F $Current,$FileName } 
+  }
+
+ } finally {
+  $OFS=$oldOFS
+ }
+}
+
 Function Get-SCCMCommandReleaseNote{
    param(
      #[ValidateNotNull()]
@@ -70,43 +128,50 @@ Function Get-SCCMCommandReleaseNote{
 
    $ReleaseNotes=[System.Collections.ArrayList]::New()
     #On lit tous les fichiers présent car on peut vouloir connaitre toutes les versions enregistrées
-   Foreach ($DataFile in Get-ChildItem -path "$PSScriptRoot\Datas\ReleaseNotes*.psd1")
+   $Files=@(Get-ChildItem -path "$PSScriptRoot\Datas\ReleaseNotes*.psd1")
+   If ($Files.Count -eq 0)
+   { Throw "No ReleaseNotes file found in the folder '$PSScriptRoot\Datas'"}
+   Foreach ($DataFile in $Files)
    {
-     try{
+        try {
+          Write-Debug "Read $DataFile"
 
-        $Data=Import-PowerShellDataFile $DataFile -ErrorAction Stop
+          $Datas=Import-PowerShellDataFile $DataFile -ErrorAction Stop
+        } catch [System.InvalidOperationException] 
+        { 
+           Write-Error $_  
+           Continue
+        } 
 
-        Write-Debug "Read $DataFile"
-       if ($isFilteredByVersion -and ($Data.LibraryChangesForVersion -NotIn $Version))
-       { Continue }
+        if ( $isFilteredByVersion -and ($Datas.LibraryChangesForVersion -NotIn $Version) )
+        { Continue }
+        Test-ReleaseNoteRequirement -Datas $Datas -FileName $Datafile -Exclude:$Filter
 
         $Parameters=@{
-          Version=$Data.LibraryChangesForVersion
-          Type='Cmdlet'
+          Version=$Datas.LibraryChangesForVersion
+          Type='Alias'
         }
-        $T=@($Data.RemovedAliasNames|Foreach-Object { New-SCCMCommandReleaseNote -Version $Data.LibraryChangesForVersion -Name $_  -Type 'Alias' -BreakingChange -Removed})
+        $T=@($Datas.RemovedAliasNames|Foreach-Object { New-SCCMCommandReleaseNote @Parameters -Name $_ -BreakingChange -Removed})
         $ReleaseNotes.AddRange($T)
 
-        $T=@($Data.RemovedCmdletNames|Foreach-Object { New-SCCMCommandReleaseNote @Parameters -Name $_  -BreakingChange -Removed})
+        $Parameters.Type='Cmdlet'
+
+        $T=@($Datas.RemovedCmdletNames|Foreach-Object { New-SCCMCommandReleaseNote @Parameters -Name $_ -BreakingChange -Removed})
         $ReleaseNotes.AddRange($T)
 
-        $T=@($Data.DeprecatedCommandNames|Foreach-Object { New-SCCMCommandReleaseNote @Parameters -Name $_ -Deprecated })
+        $T=@($Datas.DeprecatedCommandNames|Foreach-Object { New-SCCMCommandReleaseNote @Parameters -Name $_ -Deprecated })
         $ReleaseNotes.AddRange($T)
 
-        $T=@($Data.UnResolvedBugCommandNames|Foreach-Object { New-SCCMCommandReleaseNote @Parameters -Name $_ -UnResolvedBug })
+        $T=@($Datas.UnResolvedBugCommandNames|Foreach-Object { New-SCCMCommandReleaseNote @Parameters -Name $_ -UnResolvedBug })
         $ReleaseNotes.AddRange($T)
 
-        $T=@($Data.ChangedCommandNames|Foreach-Object { New-SCCMCommandReleaseNote @Parameters -Name $_ -Changed })
+        $T=@($Datas.ChangedCommandNames|Foreach-Object { New-SCCMCommandReleaseNote @Parameters -Name $_ -Changed })
         $ReleaseNotes.AddRange($T)
 
-        $T=@($Data.BreakingChangesCommandNames|Foreach-Object { New-SCCMCommandReleaseNote @Parameters -Name $_ -Changed -BreakingChange})
+        $T=@($Datas.BreakingChangesCommandNames|Foreach-Object { New-SCCMCommandReleaseNote @Parameters -Name $_ -Changed -BreakingChange})
         $ReleaseNotes.AddRange($T)
-    }
-    catch [System.InvalidOperationException] #From Import-PowerShellDataFile
-    { Write-Error $_  }
-  }
-
-  Write-Output $ReleaseNotes -NoEnumerate
+   }
+   Write-Output $ReleaseNotes -NoEnumerate
 }
 
 
@@ -121,12 +186,12 @@ Function Find-CommandName{
 
      # Liste de numéros de version des Releases Notes à vérifier
      [ValidateNotNull()]
-    [string[]] $Version
+    [string[]] $Version #todo vérifier les numéros de version, on recherche dans des release destinée à la production pas dans des prerelease
   )
 
   $Groups=(Get-SCCMCommandReleaseNote -Version $Version)|
           Group-Object -Property Name -AsHashTable
-
+  #todo versions not exist
   ForEach ($CurrentFile in $Path)
   {
     ForEach ($CurrentCommand in $Groups.GetEnumerator())
