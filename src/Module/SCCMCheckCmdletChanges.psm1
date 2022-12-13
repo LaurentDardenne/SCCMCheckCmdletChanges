@@ -74,6 +74,43 @@ Function New-SCCMCommandReleaseNote{
     }
 }
 
+Function Test-SccmVersion {
+  #Validate a SCCM release version number 
+  #By default return a boolean. 
+  #Different update versions are identified by year and month. For example, version 1511 identifies November 2015.
+  param ( 
+    [parameter(Mandatory=$true, Position=1, ValueFromPipeline=$true)]
+    [AllowEmptyString()]
+    [AllowNull()]
+    [string] $InputObject,
+     
+     #Return the invalid versions number
+    [switch] $PassThru
+  )
+
+  process {
+    [ref]$i=$null
+    #The string to be parsed must consist of integral decimal digits only.
+    $NumberStyles = [System.Globalization.NumberStyles]::None
+
+    #Neither the consistency of the month nor that of the year is tested.
+    $Result=[int]::TryParse($InputObject,$NumberStyles,[CultureInfo]::InvariantCulture,$i)
+    if ($PassThru)
+    {
+      if ($Result -eq $false)
+      { $InputObject }
+    }
+    else
+    { $Result }
+  }
+}
+
+Function Get-InvalidVersionNumber{
+  param ( [string[]] $Version)
+
+  $Version |Test-SccmVersion -PassThru
+}
+
 Function Test-ReleaseNoteRequirement{
   param(
     $Datas,
@@ -98,11 +135,11 @@ Function Test-ReleaseNoteRequirement{
     if ($Groups.'<='.Count -gt 0)
     { Write-Warning "The following are not managed : {0} . Release note file '{1}'" -F $Groups.'<=',$FileName }
   }
-  #Teste les prerequis
-  $RnVersion=$Datas.LibraryChangesForVersion
-  [ref]$v=$null
-  if ([String]::IsNullOrEmpty($RnVersion) -or ([int]::TryParse($RnVersion,$v) -eq $false))
-  { Throw "The key 'LibraryChangesForVersion' must contains an integer : {0} . Release note file '{1}'" -F $RnVersion,$FileName }
+
+  #Test requirements
+  $ReleaseVersion=$Datas.LibraryChangesForVersion
+  if ((Test-SccmVersion -InputObject $ReleaseVersion) -eq $false)
+  { Throw "The key 'LibraryChangesForVersion' must contains an integer : {0} . Release note file '{1}'" -F $ReleaseVersion,$FileName }
 
   $Uri=[Uri]$Datas.Url
   if ( ($Uri.Scheme -notmatch 'Http') -or ($Uri.IsAbsoluteUri -ne $true) )
@@ -121,18 +158,24 @@ Function Test-ReleaseNoteRequirement{
 
 Function Get-SCCMCommandReleaseNote{
    param(
-     #[ValidateNotNull()]
      [AllowNull()]
      [string[]] $Version
    )
 
    $isFilteredByVersion=$PSBoundParameters.ContainsKey('Version') -and ($null -ne $Version) -and ($Version.Count -gt 0)
+   if ($isFilteredByVersion)
+   {
+      $InvalidVersion=@(Get-InvalidVersionNumber -Version $Version)
+      if ($InvalidVersion.Count -gt 0)
+      { Throw "The following version numbers are invalid : $InvalidVersion"} 
+   }
 
    $ReleaseNotes=[System.Collections.ArrayList]::New()
-    #On lit tous les fichiers présent car on peut vouloir connaitre toutes les versions enregistrées
+
    $Files=@(Get-ChildItem -path "$PSScriptRoot\Datas\ReleaseNotes*.psd1")
    If ($Files.Count -eq 0)
    { Throw "No ReleaseNotes file found in the folder '$PSScriptRoot\Datas'"}
+   
    Foreach ($DataFile in $Files)
    {
         try {
@@ -145,9 +188,12 @@ Function Get-SCCMCommandReleaseNote{
            Continue
         } 
 
-        if ( $isFilteredByVersion -and ($Datas.LibraryChangesForVersion -NotIn $Version) )
-        { Continue }
         Test-ReleaseNoteRequirement -Datas $Datas -FileName $Datafile
+        $CurrentRelease=$Datas.LibraryChangesForVersion
+        if ( $isFilteredByVersion -and ($CurrentRelease -NotIn $Version) )
+        { Continue }
+        Write-Debug "Version $CurrentRelease "
+
 
         $Parameters=@{
           Version=$Datas.LibraryChangesForVersion
@@ -188,7 +234,7 @@ Function Find-CommandName{
 
      # Liste de numéros de version des Releases Notes à vérifier
      [ValidateNotNull()]
-    [string[]] $Version #todo vérifier les numéros de version, on recherche dans des release destinée à la production pas dans des prerelease
+    [string[]] $Version
   )
 
   $Groups=(Get-SCCMCommandReleaseNote -Version $Version)|
