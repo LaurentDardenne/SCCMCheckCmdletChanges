@@ -131,27 +131,27 @@ Function Test-ReleaseNoteRequirement{
   {
       #Une ou + clés requises n'existent pas
       #absent de la liste 
-    if ($Groups.'=>'.Count -gt 0)
-    { Throw "The required keys do not exist : {0} . Release note file '{1}'" -F $Groups.'=>',$FileName }
+    if ($Groups.'<='.Count -gt 0)
+    { Throw ("The required keys do not exist : {0} . Release note file '{1}'" -F $Groups.'<='.InputObject,$FileName) }
       #Les clés requises existent, 
       #la collection comparée contient une ou des clés supplémentaires
-    if ($Groups.'<='.Count -gt 0)
-    { Write-Warning "The following are not managed : {0} . Release note file '{1}'" -F $Groups.'<=',$FileName }
+    if ($Groups.'=>'.Count -gt 0)
+    { Write-Warning ("The following are not managed : {0} . Release note file '{1}'" -F $Groups.'=>'.InputObject,$FileName) }
   }
 
   #Test requirements
   $ReleaseVersion=$Datas.LibraryChangesForVersion
   if ((Test-SccmVersion -InputObject $ReleaseVersion) -eq $false)
-  { Throw "The key 'LibraryChangesForVersion' must contains an integer : {0} . Release note file '{1}'" -F $ReleaseVersion,$FileName }
+  { Throw ("The key 'LibraryChangesForVersion' must contains an integer (four digits in format 'yyMM') : {0} . Release note file '{1}'" -F $ReleaseVersion,$FileName) }
 
   $Uri=[Uri]$Datas.Url
   if ( ($Uri.Scheme -notmatch 'Http') -or ($Uri.IsAbsoluteUri -ne $true) )
-  { Throw "The key 'Url' must contains an URL. Release note file '{1}'" -F $Datas.Url,$FileName }
+  { Throw ("The key 'Url' must contains an URL. Release note file '{1}'" -F $Datas.Url,$FileName) }
 
   Foreach ($Current in $script:KeysNameArrayType)
   {
     if ( ($null -eq $Datas.$Current) -or ($Datas.$Current -isnot [System.Array]) ) 
-    { Throw "The key '$Current' must be of type Array. Release note file '{1}'" -F $Current,$FileName } 
+    { Throw ("The key '$Current' must be of type Array. Release note file '{1}'" -F $Current,$FileName)} 
   }
 
  } finally {
