@@ -1,7 +1,7 @@
 
 $Configuration = New-PesterConfiguration
 
-#$Configuration.filter.Tag=('Version') 
+$Configuration.filter.Tag=('Version') #DataStructure, version
 
 $Configuration.Output.Verbosity = ('Detailed')
 
