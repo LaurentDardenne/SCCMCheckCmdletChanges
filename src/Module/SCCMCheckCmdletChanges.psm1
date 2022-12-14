@@ -16,20 +16,20 @@
 [string[]]$script:KeysNameMustExist=@($script:KeysNameArrayType+$script:KeysName)
 
 Function New-SCCMCommandReleaseNote{
-#Définie un objet de release SCCM
-#Chaque commande présente dans une release note peut y être citée pour différentes raisons.
-#On doit préciser au moins un cas de modification
-#
-#L'objet renvoyé ne porte qu'une information succincte, seul le texte de la 'release note' contient
-# toutes les explications afférentes.
+<#
+Define an SCCM release object
+Each command present in a release note can be cited there for different reasons.
+You must specify at least one case of modification
+
+The returned object carries only brief information, only the text of the 'release note' contains all the related explanations.
+#>
     param(
           [Parameter(Mandatory=$True,position=0)]
           #Configuration Manager Current Branch version
-          #On duplique le numéro de version en cas mise à jour cumulative
         $Version,
 
           [Parameter(Mandatory=$True,position=1)]
-          #Nom de la commande
+          #Command name
         [string] $Name,
 
           [Parameter(position=2)]
@@ -39,26 +39,28 @@ Function New-SCCMCommandReleaseNote{
           [Parameter(position=3)]
         $Path,
 
-          #Si $True indique que la commande a été supprimée.
+        #Indicates that the command has been deleted.
         [switch] $Removed,
 
-          #Si $True indique que la commande est obsolète (l'usage est déconseillé).
+        #Indicates that the command is obsolete (use is deprecated).
         [switch] $Deprecated,
 
-          #Si $True indique que la commande contient un bug qui n'a pas été résolu.
+        #Indicates that the command contains a bug that has not been fixed.
         [switch] $UnResolvedBug,
 
-          #Si $True indique que la commande a été modifiée.
+        #Indicates that the command has been modified.
         [switch] $Changed,
 
-          #Si $True indique que la commande apporte un breaking change (plusieurs raisons possible, modification/suppression).
+        #Indicates that the command brings a breaking change (several possible reasons, modification/deletion).
         [switch] $BreakingChange
     )
 
-    # On doit préciser au moins un cas
-    $NoneOfTheCases=$null -eq ($Changed,$UnResolvedBug,$Removed,$Deprecated,$BreakingChange|Where-Object {$_.isPresent}|Select-Object -First 1)
+    #At least one case must be specified
+    $NoneOfTheCases=$null -eq ($Changed,$UnResolvedBug,$Removed,$Deprecated,$BreakingChange|
+                      Where-Object {$_.isPresent}|
+                      Select-Object -First 1)
     if ($NoneOfTheCases)
-    { Throw "Vous devez préciser au moins un type de modification pour le nom de commande '$Name'." }
+    { Throw "You must specify at least one modification type for command name '$Name'."}
 
     [pscustomobject]@{
      PSTypeName='SCCMCommandReleaseNote';
@@ -77,6 +79,7 @@ Function New-SCCMCommandReleaseNote{
 Function Test-SccmVersion {
   #Validate a SCCM release version number 
   #By default return a boolean. 
+
   #Different update versions are identified by year and month. For example, version 1511 identifies November 2015.
   param ( 
     [parameter(Mandatory=$true, Position=1, ValueFromPipeline=$true)]
@@ -129,12 +132,12 @@ Function Test-ReleaseNoteRequirement{
     #Pas de différence
   if ($Groups.'=='.Count -ne $KeysNameMustExist.Count)
   {
-      #Une ou + clés requises n'existent pas
-      #absent de la liste 
+      #One or more required keys do not exist
+      #not present in the list
     if ($Groups.'<='.Count -gt 0)
     { Throw ("The required keys do not exist : {0} . Release note file '{1}'" -F $Groups.'<='.InputObject,$FileName) }
-      #Les clés requises existent, 
-      #la collection comparée contient une ou des clés supplémentaires
+     #The required keys exist,
+     #the compared collection contains one or more additional keys
     if ($Groups.'=>'.Count -gt 0)
     { Write-Warning ("The following are not managed : {0} . Release note file '{1}'" -F $Groups.'=>'.InputObject,$FileName) }
   }
@@ -227,15 +230,16 @@ Function Get-SCCMCommandReleaseNote{
 
 
 Function Find-CommandName{
-#On recherche la présence d'un nom de commande dans des fichiers sources.
-#Les occurrences dans les commentaires sont considérées, car si on utilise l'AST de Powershell
-# on ne peut plus rechercher dans les fichiers sources en C# par exemple.
+#We search for the presence of a command name in source files.
+#Occurrences in comments are considered, because if we use Powershell's AST
+# you can no longer search in source files in C# for example.
 
   param(
-      # Liste des noms de fichier.
+      #List of filenames to scan.
     [string[]] $Path,
 
-     # Liste de numéros de version des Releases Notes à vérifier
+      #List of Release Notes version numbers to check. 
+      #If the parameter is not specified, we search for all versions.
      [ValidateNotNull()]
     [string[]] $Version
   )
@@ -254,14 +258,14 @@ Function Find-CommandName{
         $Pattern=$CurrentCommand.Name
         Write-Debug "Search '$Pattern' into '$CurrentFile'"
 
-        #C'est la première passe du contrôle des sources
-        #Une revue de code est nécessaire en seconde passe.
+         #This is the first pass of source control
+         #A code review is necessary as a second pass.
         if (Select-String -Path $CurrentFile -Pattern "\b${Pattern}\b" -Quiet)
         {
-            #La commande peut être citée pour plusieurs raisons ou citée par plusieurs releasenotes.
+            #The command may be quoted for multiple reasons or appear in multiple release notes.
             Foreach ($CurrentDetail in $CurrentCommand.Value)
             {
-                #On clone un objet de la liste Groups en cours d'itération
+                #We clone an object from the Groups list during iteration
               $o=$CurrentDetail.PSObject.Copy()
               $o.Path=$CurrentFile
               $o
