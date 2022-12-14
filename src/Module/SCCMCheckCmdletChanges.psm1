@@ -84,17 +84,20 @@ Function Test-SccmVersion {
     [AllowNull()]
     [string] $InputObject,
      
-     #Return the invalid versions number
+     #Return only the invalid versions number
     [switch] $PassThru
   )
-
+  Begin {
+    $Pattern='^(?<Year>\d{2})(?<Month>\d{2})$'
+  }
   process {
-    [ref]$i=$null
-    #The string to be parsed must consist of integral decimal digits only.
-    $NumberStyles = [System.Globalization.NumberStyles]::None
+    $Result=$InputObject -match $Pattern
+    if ($Result)
+    { 
+      if (($Matches.Month -as [Int]) -notIn (1..12) )
+      { $Result=$false }
+    }
 
-    #Neither the consistency of the month nor that of the year is tested.
-    $Result=[int]::TryParse($InputObject,$NumberStyles,[CultureInfo]::InvariantCulture,$i)
     if ($PassThru)
     {
       if ($Result -eq $false)
