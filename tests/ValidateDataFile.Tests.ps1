@@ -1,7 +1,7 @@
-$DatasDirectory="$PsScriptRoot\Datas"
+$Global:DatasDirectory="$PsScriptRoot\Datas"
 $ModuleDirectory="$PsScriptRoot\..\Src\Module"
 
-Import-Module "$ModuleDirectory\SCCMCheckCmdletChanges.psd1"
+Import-Module "$ModuleDirectory\SCCMCheckCmdletChanges.psd1" -Force
 
 [string[]]$global:ValidVersions=@(
     '0001',
@@ -26,7 +26,7 @@ Import-Module "$ModuleDirectory\SCCMCheckCmdletChanges.psd1"
 
 
 Describe 'Test requirements' {
-    Context "Get-InvalidVersionNumber." {
+    Context "Get-InvalidVersionNumber"  -Tag 'Version' {
        It "Valid version number" {
         InModuleScope 'SCCMCheckCmdletChanges' -Parameters @{ ValidVersion = $global:ValidVersions } {
             $MustBeValidVersion = [System.Predicate[string]] { param($Version) Test-SccmVersion -InputObject $Version}
@@ -51,7 +51,7 @@ Describe 'Test requirements' {
          }
        }  
 
-       It "Invalid version number with PassThru parameter" {
+       It "Invalid version numbers with PassThru parameter" {
         InModuleScope 'SCCMCheckCmdletChanges' {
             $Result='0000','2312' |Test-SccmVersion -PassThru
             $Result | Should -BeExactly '0000'
@@ -73,5 +73,52 @@ Describe 'Test requirements' {
             $Set.Count -eq $ValidVersions.Count | Should -be $True
          }
        }
+    }
+
+    Context "Test-ReleaseNoteRequirement" -Tag 'DataStructure' {
+
+        'InvalidKeyContent.psd1'
+        'InvalidVersionNumber.psd1'
+        'MissingKey.psd1'
+
+        It "Missing Key" {
+           
+           InModuleScope 'SCCMCheckCmdletChanges' -Parameters @{ Path = "$global:DatasDirectory\MissingKey.psd1" } {
+             $Datas=Import-PowerShellDataFile $Path
+             
+             $Err = {Test-ReleaseNoteRequirement -Datas $Datas -FileName $Path } | Should -Throw -PassThru
+             $Err.Exception.Message | Should -match 'The required keys do not exist : RemovedAliasNames'
+          }
+        }
+             
+
+        It "Invalid version number" {
+            InModuleScope 'SCCMCheckCmdletChanges' -Parameters @{ Path = "$global:DatasDirectory\InvalidVersionNumber.psd1" } {
+                $Datas=Import-PowerShellDataFile $Path
+
+                $Err = {Test-ReleaseNoteRequirement -Datas $Datas -FileName $Path } | Should -Throw -PassThru 
+                $Err.Exception.Message | Should -match "The key 'LibraryChangesForVersion' must contains an integer \(four digits in format 'yyMM'\)"
+             }
+        }    
+
+        It "Content of 'RemovedCmdletNames' key is not an array" {
+            
+            InModuleScope 'SCCMCheckCmdletChanges' -Parameters @{ Path = "$global:DatasDirectory\InvalidKeyContent.psd1" } {
+                $Datas=Import-PowerShellDataFile $Path
+
+                $Err = {Test-ReleaseNoteRequirement -Datas $Datas -FileName $Path } | Should -Throw -PassThru 
+                $Err.Exception.Message | Should -match "The key 'RemovedCmdletNames' must be of type Array"
+             }
+        }    
+
+        It "Content of 'Url' key is not a valid URI" {
+            
+            InModuleScope 'SCCMCheckCmdletChanges' -Parameters @{ Path = "$global:DatasDirectory\InvalidUri.psd1" } {
+                $Datas=Import-PowerShellDataFile $Path
+
+                $Err = {Test-ReleaseNoteRequirement -Datas $Datas -FileName $Path } | Should -Throw -PassThru 
+                $Err.Exception.Message | Should -match "The key 'Url' must contains an URL"
+             }
+        }       
     }
 }
