@@ -108,7 +108,7 @@ Find-CommandName -path .\Examples\TestUnsupportedPSCoreCmdlets.ps1 -VerifyCoreCL
 ```
 
 Return for this file :
-
+```Powershell
 Version             : 2111
 Name                : Set-CMScriptDeploymentType
 Type                : Cmdlet
@@ -141,6 +141,7 @@ isDeprecated        : False
 isUnResolvedBug     : False
 isChanged           : False
 isBreakingChange    : False
+```
 
 In this case we can find two entries for the same version, here the 2111, one indicating that the cmdlet is not supported by Powershell Core, the other indicating the modifications for Powershell version 5.1.
 
