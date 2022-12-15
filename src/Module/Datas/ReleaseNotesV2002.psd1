@@ -9,8 +9,9 @@
 
    RemovedAliasNames=@()
 
+   UnsupportedPSCoreCommandNames=@()
+   
    DeprecatedCommandNames=@()
-
 
    UnresolvedBugCommandNames=@()
 

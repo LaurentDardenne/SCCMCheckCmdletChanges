@@ -9,6 +9,15 @@
    RemovedAliasNames=@(
    )
 
+   UnsupportedPSCoreCommandNames=@(
+      'Import-CMPackage',
+      'Import-CMDriverPackage',
+      'Import-CMTaskSequence',
+      'Export-CMPackage',
+      'Export-CMDriverPackage',
+      'Export-CMTaskSequence'
+   )
+
    DeprecatedCommandNames=@()
 
    UnresolvedBugCommandNames=@(

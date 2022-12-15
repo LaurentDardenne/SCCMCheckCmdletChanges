@@ -14,6 +14,8 @@
    RemovedAliasNames=@(
    )
 
+   UnsupportedPSCoreCommandNames=@()
+   
    DeprecatedCommandNames=@(
     'Invoke-CMEndpointProtectionScan',
     'Save-CMEndpointProtectionDefinition' #superseded by Invoke-CMClientAction.

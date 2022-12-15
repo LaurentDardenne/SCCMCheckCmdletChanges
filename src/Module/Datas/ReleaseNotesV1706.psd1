@@ -13,6 +13,8 @@
    RemovedAliasNames=@(
    )
 
+   UnsupportedPSCoreCommandNames=@()
+   
    DeprecatedCommandNames=@(
    )
 

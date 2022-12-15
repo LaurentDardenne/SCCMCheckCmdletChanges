@@ -61,7 +61,8 @@
     'Set-CMIntuneSubscriptionAppleMdmProperty'
    )
 
-
+   UnsupportedPSCoreCommandNames=@()
+   
    DeprecatedCommandNames=@()
 
    UnresolvedBugCommandNames=@(

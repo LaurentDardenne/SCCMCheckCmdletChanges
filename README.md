@@ -37,6 +37,12 @@ List of deleted Cmdlets The code using them needs to be corrected. These deletio
 
 List of deleted aliases. The code using them needs to be corrected. These deletions are considered in the analytical result as breaking changes.
 
+### UnsupportedPSCoreCommandNames
+
+Since [release 2103](https://learn.microsoft.com/en-us/powershell/sccm/2103-release-notes?view=sccm-ps#cmdlets-that-dont-support-powershell-version-7) SCCM cmdlets can be used with Powershell 7, except for a few.
+
+Searching for these cmdlets is enabled through the -VerifyCoreCLR parameter of the Find-CommandName function.
+
 ### DeprecatedCommandNames
 
 List of obsolete (deprecated) cmdlets The code using them is not impacted, it is recommended to stop using them and to adapt the code.
@@ -73,6 +79,7 @@ Name                       : Set-CMScriptDeploymentType
 Type                       : Cmdlet
 Path                       : .\Examples\Test.ps1
 isRemoved                  : False
+isUnsupportedPSCore        : False
 isDeprecated               : False
 isUnResolvedBug            : False
 isChanged                  : True
@@ -83,6 +90,7 @@ Name                       : Set-CMScriptDeploymentType
 Type                       : Cmdlet
 Path                       : .\Examples\Test.ps1
 isRemoved                  : False
+isUnsupportedPSCore        : False
 isDeprecated               : False
 isUnResolvedBug            : False
 isChanged                  : True
@@ -90,3 +98,60 @@ isBreakingChange           : False
 ```
 
 An command  can be present in several release notes and for different reasons.
+Default code search target for Powershell v5.1.
+
+
+If your Powershell Core target code ( >= V7) specify the VerifyCoreCLR parameter:
+```Powershell
+cd Demo
+Find-CommandName -path .\Examples\TestUnsupportedPSCoreCmdlets.ps1 -VerifyCoreCLR
+```
+
+Return for this file :
+
+Version             : 2111
+Name                : Set-CMScriptDeploymentType
+Type                : Cmdlet
+Path                : .\Examples\TestUnsupportedPSCoreCmdlets.ps1
+isRemoved           : False
+isUnsupportedPSCore : False
+isDeprecated        : False
+isUnResolvedBug     : False
+isChanged           : True
+isBreakingChange    : False
+
+Version             : 2103
+Name                : Export-CMPackage
+Type                : Cmdlet
+Path                : .\Examples\TestUnsupportedPSCoreCmdlets.ps1
+isRemoved           : False
+isUnsupportedPSCore : True
+isDeprecated        : False
+isUnResolvedBug     : False
+isChanged           : False
+isBreakingChange    : False
+
+Version             : 2111
+Name                : Export-CMPackage
+Type                : Cmdlet
+Path                : .\Examples\TestUnsupportedPSCoreCmdlets.ps1
+isRemoved           : False
+isUnsupportedPSCore : True
+isDeprecated        : False
+isUnResolvedBug     : False
+isChanged           : False
+isBreakingChange    : False
+
+In this case we can find two entries for the same version, here the 2111, one indicating that the cmdlet is not supported by Powershell Core, the other indicating the modifications for Powershell version 5.1.
+
+You can also filter cmdlets that are not supported:
+```powershell
+Find-CommandName -path .\Examples\TestUnsupportedPSCoreCmdlets.ps1 -VerifyCoreCLR|
+  Where-Object { $_.isUnsupportedPSCore }|
+  Select-Object -ExpandProperty Name -Unique
+```
+or group the result by version :
+```powershell
+Find-CommandName -path .\Examples\TestUnsupportedPSCoreCmdlets.ps1 -VerifyCoreCLR|
+ Group-object isUnsupportedPSCore
+```

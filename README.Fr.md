@@ -40,6 +40,12 @@ Le code les utilisant est à corriger. Ces suppressions sont considérées dans 
 Liste des alias supprimés.
 Le code les utilisant est à corriger. Ces suppressions sont considérées dans le résultat d'analyse comme étant des breaking change.
 
+### UnsupportedPSCoreCommandNames
+
+Depuis la [release 2103](https://learn.microsoft.com/en-us/powershell/sccm/2103-release-notes?view=sccm-ps#cmdlets-that-dont-support-powershell-version-7) les cmdlets SCCM peuvent être utilisés avec Powershell 7, exceptés quelques-uns.
+
+La recherche de ces cmdlets est activée via le paramètre -VerifyCoreCLR de la fonction Find-CommandName.
+
 ### DeprecatedCommandNames
 
 Liste les cmdlet obsolète (déconseillés)
@@ -84,6 +90,7 @@ Name                       : Set-CMScriptDeploymentType
 Type                       : Cmdlet
 Path                       : .\Examples\Test.ps1
 isRemoved                  : False
+isUnsupportedPSCore        : False
 isDeprecated               : False
 isUnResolvedBug            : False
 isChanged                  : True
@@ -94,6 +101,7 @@ Name                       : Set-CMScriptDeploymentType
 Type                       : Cmdlet
 Path                       : .\Examples\Test.ps1
 isRemoved                  : False
+isUnsupportedPSCore        : False
 isDeprecated               : False
 isUnResolvedBug            : False
 isChanged                  : True
@@ -101,21 +109,62 @@ isBreakingChange           : False
 ```
 
 Une commande peut être présente dans plusieurs release note et pour des raisons différentes.
+Par défaut le recherche cible du code pour Powershell v5.1
 
-Pour le cmdlet Set-CMScriptDeploymentType, la version 2002 précise :
 
-### Breaking changes
+Si votre code cible Powershell Core ( >= V7) précisez le paramètre VerifyCoreCLR :
 
-The -ContentLocation will no longer accept an empty folder.
+```Powershell
+cd Demo
+Find-CommandName -path .\Examples\TestUnsupportedPSCoreCmdlets.ps1 -VerifyCoreCLR
+```
 
-### Bugs that were fixed
+Retourne pour ce fichier le résultat suivant :
 
-The -ContentLocation shouldn't allow an empty folder.
+Version             : 2111
+Name                : Set-CMScriptDeploymentType
+Type                : Cmdlet
+Path                : .\Examples\TestUnsupportedPSCoreCmdlets.ps1
+isRemoved           : False
+isUnsupportedPSCore : False
+isDeprecated        : False
+isUnResolvedBug     : False
+isChanged           : True
+isBreakingChange    : False
 
-Et la version 2006 précise :
+Version             : 2103
+Name                : Export-CMPackage
+Type                : Cmdlet
+Path                : .\Examples\TestUnsupportedPSCoreCmdlets.ps1
+isRemoved           : False
+isUnsupportedPSCore : True
+isDeprecated        : False
+isUnResolvedBug     : False
+isChanged           : False
+isBreakingChange    : False
 
-For more information, see [Set-CMScriptDeploymentType.](https://docs.microsoft.com/en-us/powershell/module/configurationmanager/set-cmscriptdeploymenttype?view=sccm-ps)
+Version             : 2111
+Name                : Export-CMPackage
+Type                : Cmdlet
+Path                : .\Examples\TestUnsupportedPSCoreCmdlets.ps1
+isRemoved           : False
+isUnsupportedPSCore : True
+isDeprecated        : False
+isUnResolvedBug     : False
+isChanged           : False
+isBreakingChange    : False
 
-### Non-breaking changes
+Dans ce cas on peut trouver deux entrées pour une même version, ici la 2111, l'une indiquant que le cmdlet n'est pas supporté par Powershell Core, l'autre indiquant les modifications pour Powershell version 5.1.
 
-You can now specify an empty string for the parameters -UninstallCommand and -RepairCommand.
+On peut également filtrer les cmdlets qui ne sont pas supportés :
+```powershell
+Find-CommandName -path .\Examples\TestUnsupportedPSCoreCmdlets.ps1 -VerifyCoreCLR|
+  Where-Object { $_.isUnsupportedPSCore }|
+  Select-Object -ExpandProperty Name -Unique
+```
+ou les regrouper par version :
+```powershell
+Find-CommandName -path .\Examples\TestUnsupportedPSCoreCmdlets.ps1 -VerifyCoreCLR|
+ Group-object isUnsupportedPSCore
+```
+

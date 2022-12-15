@@ -11,6 +11,8 @@
    RemovedAliasNames=@(
    )
 
+   UnsupportedPSCoreCommandNames=@()
+   
    DeprecatedCommandNames=@(
     'New-CMGlobalCondition',
     'Set-CMGlobalCondition'

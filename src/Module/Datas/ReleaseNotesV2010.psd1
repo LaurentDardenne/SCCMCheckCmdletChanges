@@ -17,6 +17,8 @@
    RemovedAliasNames=@(
    )
 
+   UnsupportedPSCoreCommandNames=@()
+   
    DeprecatedCommandNames=@(
       'Set-CMClientSetting'
    )

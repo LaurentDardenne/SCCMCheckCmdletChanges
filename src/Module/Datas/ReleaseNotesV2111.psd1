@@ -15,6 +15,15 @@
     RemovedAliasNames=@(
     )
 
+    #From release 2103 
+    UnsupportedPSCoreCommandNames=@(
+      'Import-CMPackage',
+      'Import-CMDriverPackage',
+      'Import-CMTaskSequence',
+      'Export-CMPackage',
+      'Export-CMDriverPackage',
+      'Export-CMTaskSequence'
+    )
 
     DeprecatedCommandNames=@(
                 'Add-CMDeploymentTypeSupersedence',

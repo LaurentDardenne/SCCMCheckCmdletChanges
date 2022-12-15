@@ -8,6 +8,7 @@
 [string[]]$script:KeysNameArrayType=@(
    'RemovedCmdletNames',
    'RemovedAliasNames',
+   'UnsupportedPSCoreCommandNames',
    'DeprecatedCommandNames',
    'UnresolvedBugCommandNames',
    'ChangedCommandNames',
@@ -45,6 +46,9 @@ The returned object carries only brief information, only the text of the 'releas
         #Indicates that the command is obsolete (use is deprecated).
         [switch] $Deprecated,
 
+        #Indicates that the command is not supported for Powershell Core.
+        [switch] $UnsupportedPSCore,
+
         #Indicates that the command contains a bug that has not been fixed.
         [switch] $UnResolvedBug,
 
@@ -56,23 +60,24 @@ The returned object carries only brief information, only the text of the 'releas
     )
 
     #At least one case must be specified
-    $NoneOfTheCases=$null -eq ($Changed,$UnResolvedBug,$Removed,$Deprecated,$BreakingChange|
+    $NoneOfTheCases=$null -eq ($Changed,$UnResolvedBug,$Removed,$Deprecated,$BreakingChange,$UnsupportedPSCore|
                       Where-Object {$_.isPresent}|
                       Select-Object -First 1)
     if ($NoneOfTheCases)
     { Throw "You must specify at least one modification type for command name '$Name'."}
 
     [pscustomobject]@{
-     PSTypeName='SCCMCommandReleaseNote';
-     Version=$Version;
-     Name=$Name;
-     Type=$Type;
-     Path=$Path;
-     isRemoved=$Removed.isPresent;
-     isDeprecated=$Deprecated.isPresent;
-     isUnResolvedBug=$UnResolvedBug.isPresent;
-     isChanged=$Changed.isPresent;
-     isBreakingChange=$BreakingChange.isPresent;
+      PSTypeName='SCCMCommandReleaseNote';
+      Version=$Version;
+      Name=$Name;
+      Type=$Type;
+      Path=$Path;
+      isRemoved=$Removed.isPresent;
+      isUnsupportedPSCore=$UnsupportedPSCore.isPresent;
+      isDeprecated=$Deprecated.isPresent;
+      isUnResolvedBug=$UnResolvedBug.isPresent;
+      isChanged=$Changed.isPresent;
+      isBreakingChange=$BreakingChange.isPresent;
     }
 }
 
@@ -165,7 +170,9 @@ Function Test-ReleaseNoteRequirement{
 Function Get-SCCMCommandReleaseNote{
    param(
      [AllowNull()]
-     [string[]] $Version
+     [string[]] $Version,
+
+    [switch] $VerifyCoreCLR
    )
 
    $isFilteredByVersion=$PSBoundParameters.ContainsKey('Version') -and ($null -ne $Version) -and ($Version.Count -gt 0)
@@ -213,6 +220,12 @@ Function Get-SCCMCommandReleaseNote{
         $T=@($Datas.RemovedCmdletNames|Foreach-Object { New-SCCMCommandReleaseNote @Parameters -Name $_ -BreakingChange -Removed})
         $ReleaseNotes.AddRange($T)
 
+        if ($VerifyCoreCLR)
+        { 
+          $T=@($Datas.UnsupportedPSCoreCommandNames|Foreach-Object { New-SCCMCommandReleaseNote @Parameters -Name $_ -UnsupportedPSCore })
+          $ReleaseNotes.AddRange($T)
+        }
+
         $T=@($Datas.DeprecatedCommandNames|Foreach-Object { New-SCCMCommandReleaseNote @Parameters -Name $_ -Deprecated })
         $ReleaseNotes.AddRange($T)
 
@@ -241,10 +254,13 @@ Function Find-CommandName{
       #List of Release Notes version numbers to check. 
       #If the parameter is not specified, we search for all versions.
      [ValidateNotNull()]
-    [string[]] $Version
+    [string[]] $Version,
+
+     #Search for Cmdlets that don't support PowerShell version 7
+    [switch] $VerifyCoreCLR
   )
 
-  $Groups=(Get-SCCMCommandReleaseNote -Version $Version)|
+  $Groups=(Get-SCCMCommandReleaseNote -Version $Version -VerifyCoreCLR:$VerifyCoreCLR)|
           Group-Object -Property Name -AsHashTable
   If ($null -eq $Groups)
   { 
